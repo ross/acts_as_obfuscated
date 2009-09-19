@@ -1,0 +1,81 @@
+ActsAsObfuscated
+================
+
+Add support to ActiveRecord::Base for id obfuscation, i.e. instead of
+.../users/show/1 you get .../users/show/cXdbpx completely transparently
+
+Install
+=======
+
+script/plugin install git://github.com/ross/acts_as_obfuscated.git
+
+Example
+=======
+
+Just add acts_as_obfuscated to the desired model objects:
+
+class User < ActiveRecord::Base
+  acts_as_obfuscated
+
+  ...
+end
+
+and that's it. 
+
+$ ./script/console 
+Loading development environment (Rails 2.3.4)
+>> u = User.create(:name => 'Bob')
+=> #<User id: 4, name: "Bob", created_at: "2009-09-19 04:53:43", updated_at: "2009-09-19 04:53:43">
+>> u.id
+=> 4
+>> u.eid
+=> "diBGnp"
+>> User.find(u.id)
+=> #<User id: 4, name: "Bob", created_at: "2009-09-19 04:53:43", updated_at: "2009-09-19 04:53:43">
+>> User.find(u.eid)
+=> #<User id: 4, name: "Bob", created_at: "2009-09-19 04:53:43", updated_at: "2009-09-19 04:53:43">
+>>
+
+acts_as_obfuscated doesn't stop you from adding custom to_param functions, so
+long as the first portion is the eid followed by a '-':
+
+class User < ActiveRecord::Base
+  acts_as_obfuscated
+
+  has_many(:toys)
+
+  def to_param
+    CGI.escape("#{super.to_param}-#{self.name}").gsub(/\./, '_')
+  end
+end
+
+$ ./script/console 
+Loading development environment (Rails 2.3.4)
+u= U>> u= User.last
+=> #<User id: 4, name: "Bob", created_at: "2009-09-19 04:53:43", updated_at: "2009-09-19 04:53:43">
+>> u.to_param
+=> "diBGnp-Bob"
+>> User.find(u.to_param)
+=> #<User id: 4, name: "Bob", created_at: "2009-09-19 04:53:43", updated_at: "2009-09-19 04:53:43">
+
+Copyright & License
+===================
+Copyright (c) 2009 ross mcfarland
+Contact via Github for change requests, etc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
