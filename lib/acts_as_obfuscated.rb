@@ -87,17 +87,26 @@ module ActsAsObfuscated
         validate_find_options(options)
         set_readonly_option!(options)
 
+        first = args.first
         case args.first
           when :first then find_initial(options)
           when :last  then find_last(options)
           when :all   then find_every(options)
           else
-            # if it's completely numbers
-            if args.first.kind_of?(Fixnum) or args.first =~ /^\d+$/ then
-              # use original
+            if first.kind_of?(Fixnum) or first =~ /^\d+$/ then
+              # id
               find_from_ids(args, options)
+            elsif first.kind_of?(Array) then
+              # TODO: support mixed arrays?
+              if first.first.kind_of?(Fixnum) or first.first =~ /^\d+$/ then
+                # ids
+                find_from_ids(args, options)
+              else
+                # eids
+                find_by_eid(args, options)
+              end
             else
-              # use find_by_eid
+              # eid
               find_by_eid(args, options)
             end
         end
@@ -110,7 +119,7 @@ module ActsAsObfuscated
       else
         id = eid_to_id(eid)
       end
-      find_from_ids(id, *args)
+      find(id, *args)
     end
 
     alias_method(:find_by_eids, :find_by_eid)
