@@ -107,7 +107,7 @@ module ActsAsObfuscated
               end
             else
               # eid
-              find_by_eid(args, options)
+              find_by_eid(args.first, options)
             end
         end
     end
@@ -115,7 +115,11 @@ module ActsAsObfuscated
     def find_by_eid(eid, *args)
       id = nil
       if eid.kind_of? Array
-        id = eid.collect { |eid| eid_to_id(eid) }
+        if eid.first.kind_of? Array
+          id = eid.first.collect { |eid| eid_to_id(eid) }
+        else
+          id = eid.collect { |eid| eid_to_id(eid) }
+        end
       else
         id = eid_to_id(eid)
       end
