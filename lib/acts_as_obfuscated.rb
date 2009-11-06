@@ -88,12 +88,14 @@ module ActsAsObfuscated
         set_readonly_option!(options)
 
         first = args.first
-        case args.first
+        case first
           when :first then find_initial(options)
           when :last  then find_last(options)
           when :all   then find_every(options)
           else
-            if first.kind_of?(Fixnum) or first =~ /^\d+$/ then
+            if first == nil
+                raise ActiveRecord::RecordNotFound, "Couldn't find #{self.class.name} without an ID"
+            elsif first.kind_of?(Fixnum) or first =~ /^\d+$/ then
               # id
               find_from_ids(args, options)
             elsif first.kind_of?(Array) then
